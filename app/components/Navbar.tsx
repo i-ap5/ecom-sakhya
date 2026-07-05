@@ -1,17 +1,26 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import type { HttpTypes } from "@medusajs/types";
 import { useCart } from "../context/CartContext";
 import AnnouncementBar from "./AnnouncementBar";
 import SearchModal from "./SearchModal";
+import { listCategories } from "@/lib/medusa/products";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categories, setCategories] = useState<HttpTypes.StoreProductCategory[]>([]);
   const { cartCount, setCartOpen } = useCart();
 
+  useEffect(() => {
+    listCategories()
+      .then(setCategories)
+      .catch((error) => console.error("Failed to load nav categories", error));
+  }, []);
+
   const navLinks = [
-    { label: "Women", href: "/shop" },
     { label: "New Arrivals", href: "/shop" },
     { label: "All Product", href: "/shop" },
   ];
@@ -27,6 +36,35 @@ export default function Navbar() {
 
       {/* Desktop Nav */}
       <ul className="hidden md:flex items-center gap-8 text-sm text-gray-700 font-medium">
+        {categories.length > 0 && (
+          <li
+            className="relative"
+            onMouseEnter={() => setCategoriesOpen(true)}
+            onMouseLeave={() => setCategoriesOpen(false)}
+          >
+            <button className="flex items-center gap-1 hover:text-black transition-colors cursor-pointer">
+              Categories
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+            {categoriesOpen && (
+              <div className="absolute top-full left-0 pt-3 w-48">
+                <div className="bg-white border border-gray-100 rounded-xl shadow-lg py-2">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/shop?category=${cat.id}`}
+                      className="block px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-50 transition-colors"
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </li>
+        )}
         {navLinks.map((item) => (
           <li key={item.label}>
             <Link href={item.href} className="hover:text-black transition-colors">
@@ -112,6 +150,23 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 py-4 px-6 flex flex-col gap-4 md:hidden shadow-lg z-50">
+          {categories.length > 0 && (
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Categories</p>
+              <div className="flex flex-col gap-3">
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/shop?category=${cat.id}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="text-sm text-gray-700 hover:text-black transition-colors"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
           {navLinks.map((item) => (
             <Link
               key={item.label}

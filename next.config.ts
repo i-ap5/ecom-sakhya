@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
         hostname: "t3.storageapi.dev",
       },
       {
+        protocol: "https",
+        hostname: "*.r2.dev",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "9000",
