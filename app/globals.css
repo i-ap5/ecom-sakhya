@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+body {
+  font-family: var(--font-nohemi), Arial, sans-serif;
+  background: #ffffff;
+  color: #171717;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-nohemi), Arial, sans-serif;
+}
+
+.clip-hero-left {
+  clip-path: url(#clip-hero-left-path);
+}
+
+.clip-hero-middle {
+  clip-path: url(#clip-hero-middle-path);
+}
+
+.clip-hero-right {
+  clip-path: url(#clip-hero-right-path);
+}
+
