@@ -57,3 +57,33 @@ export function getCheapestVariant(
 ): HttpTypes.StoreProductVariant | undefined {
   return product.variants?.find((v) => v.calculated_price != null) ?? product.variants?.[0];
 }
+
+const NEW_PRODUCT_WINDOW_DAYS = 30;
+
+export function isNewProduct(product: HttpTypes.StoreProduct): boolean {
+  if (!product.created_at) return false;
+  const ageMs = Date.now() - new Date(product.created_at).getTime();
+  return ageMs < NEW_PRODUCT_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+}
+
+// The store API's `calculated_price` object has more fields at runtime than the
+// SDK's TS types declare (e.g. `original_amount`), since it reflects whether a
+// price-list/promotion discount is active.
+export function getOriginalAmount(
+  variant: HttpTypes.StoreProductVariant | undefined
+): number | undefined {
+  const price = variant?.calculated_price as
+    | { calculated_amount: number; original_amount?: number }
+    | null
+    | undefined;
+  return price?.original_amount;
+}
+
+export function getDiscountPercent(
+  variant: HttpTypes.StoreProductVariant | undefined
+): number | undefined {
+  const calculated = variant?.calculated_price?.calculated_amount;
+  const original = getOriginalAmount(variant);
+  if (calculated == null || original == null || original <= calculated) return undefined;
+  return Math.round(((original - calculated) / original) * 100);
+}

@@ -125,7 +125,17 @@ export default function Footer() {
 
       <div className="border-t border-gray-100 px-6 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-400">
         <p>© 2026 Saghya. All rights reserved.</p>
-        <p>Made with care in India.</p>
+        <p>
+          Made by{" "}
+          <a
+            href="https://trowcode.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-black transition-colors"
+          >
+            trowcode
+          </a>
+        </p>
       </div>
     </footer>
   );

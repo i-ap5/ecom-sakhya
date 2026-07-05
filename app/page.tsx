@@ -2,7 +2,6 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import TrustBar from "./components/TrustBar";
 import ShopByCategory from "./components/ShopByCategory";
-import TextHighlight from "./components/TextHighlight";
 import NewCollections from "./components/NewCollections";
 import FeaturedProduct from "./components/FeaturedProduct";
 import TrendingNow from "./components/TrendingNow";
@@ -17,7 +16,7 @@ export default function Home() {
         <Hero />
         <TrustBar />
         <ShopByCategory />
-        <TextHighlight />
+        {/* TextHighlight hidden for now — kept in app/components/TextHighlight.tsx to re-enable later */}
         <NewCollections />
         <FeaturedProduct />
         <TrendingNow />

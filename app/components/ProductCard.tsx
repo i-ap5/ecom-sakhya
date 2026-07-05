@@ -2,7 +2,13 @@ import Link from "next/link";
 import type { HttpTypes } from "@medusajs/types";
 import ProductImage from "./ProductImage";
 import StarRating from "./StarRating";
-import { formatPrice, getCheapestVariant } from "@/lib/medusa/products";
+import {
+  formatPrice,
+  getCheapestVariant,
+  getDiscountPercent,
+  getOriginalAmount,
+  isNewProduct,
+} from "@/lib/medusa/products";
 import { getProductRating } from "@/lib/rating";
 
 export default function ProductCard({
@@ -17,6 +23,8 @@ export default function ProductCard({
   const variant = getCheapestVariant(product);
   const price = variant?.calculated_price?.calculated_amount;
   const { rating, reviewCount } = getProductRating(product.id);
+  const discountPercent = getDiscountPercent(variant);
+  const isNew = isNewProduct(product);
 
   return (
     <div className="group flex flex-col">
@@ -34,6 +42,19 @@ export default function ProductCard({
             />
           )}
         </Link>
+        {(isNew || discountPercent) && (
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+            {discountPercent ? (
+              <span className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">
+                {discountPercent}% Off
+              </span>
+            ) : (
+              <span className="bg-black text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">
+                New
+              </span>
+            )}
+          </div>
+        )}
         {variant && (
           <button
             onClick={() => onQuickAdd(variant.id)}
@@ -52,9 +73,16 @@ export default function ProductCard({
             <StarRating rating={rating} reviewCount={reviewCount} />
           </div>
         </Link>
-        <p className="text-xs font-semibold text-gray-400 whitespace-nowrap">
-          {price != null ? formatPrice(price, currencyCode) : "—"}
-        </p>
+        <div className="text-right whitespace-nowrap">
+          <p className="text-xs font-semibold text-gray-400">
+            {price != null ? formatPrice(price, currencyCode) : "—"}
+          </p>
+          {discountPercent && (
+            <p className="text-[10px] text-gray-300 line-through">
+              {formatPrice(getOriginalAmount(variant)!, currencyCode)}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

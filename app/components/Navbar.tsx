@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
+import AnnouncementBar from "./AnnouncementBar";
 import SearchModal from "./SearchModal";
 
 export default function Navbar() {
@@ -16,7 +17,9 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="w-full px-6 md:px-12 py-4 flex items-center justify-between bg-white border-b border-gray-100 sticky top-0 z-50">
+    <>
+      <AnnouncementBar />
+      <nav className="w-full px-6 md:px-12 py-4 flex items-center justify-between bg-white border-b border-gray-100 sticky top-0 z-50">
       {/* Logo */}
       <Link href="/" className="text-xl font-bold tracking-widest uppercase" style={{ fontFamily: "var(--font-nohemi)" }}>
         SAGHYA
@@ -139,6 +142,7 @@ export default function Navbar() {
       )}
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </nav>
+      </nav>
+    </>
   );
 }

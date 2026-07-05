@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         hostname: "dtcbackend-production-4bfb.up.railway.app",
       },
       {
+        protocol: "https",
+        hostname: "t3.storageapi.dev",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "9000",

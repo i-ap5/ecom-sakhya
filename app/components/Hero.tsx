@@ -108,20 +108,21 @@ export default function Hero() {
             </div>
 
             {/* Shop now positioned at the bottom-left gap area (outside clipped card) */}
-            <div className="absolute bottom-4 left-6 md:bottom-6 md:left-8 z-20">
+            <div className="absolute bottom-3 left-4 md:bottom-6 md:left-8 z-20">
               <Link
                 href="/shop"
-                className="group flex items-center gap-3 text-black hover:text-gray-700 transition-colors text-base md:text-lg tracking-wide"
+                className="group flex items-center gap-1.5 md:gap-3 text-black hover:text-gray-700 transition-colors text-sm md:text-lg tracking-wide"
               >
                 <span>
                   <span className="font-extrabold">shop </span>
                   <span className="font-light">now</span>
                 </span>
-                <div className="w-9 h-9 rounded-full bg-[#1c1815] text-white flex items-center justify-center shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-black">
+                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[#1c1815] text-white flex items-center justify-center shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-black flex-shrink-0">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
+                    width="10"
+                    height="10"
+                    className="md:w-3 md:h-3"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
