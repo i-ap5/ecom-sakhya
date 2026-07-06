@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import ProductImage from "./ProductImage";
 import { listCategories, listProducts } from "@/lib/medusa/products";
@@ -13,29 +12,56 @@ interface CategoryCard {
 }
 
 export default function Hero() {
-  const [productCount, setProductCount] = useState<number | null>(null);
   const [cards, setCards] = useState<CategoryCard[]>([]);
+  const [heroImage, setHeroImage] = useState<string | null>(null);
 
   useEffect(() => {
-    listProducts({ limit: 1 })
-      .then(({ count }) => setProductCount(count))
-      .catch((error) => console.error("Failed to load product count", error));
-
     listCategories()
       .then(async (categories) => {
-        const top = categories.slice(0, 2);
-        const withThumbnails = await Promise.all(
-          top.map(async (category) => {
-            const { products } = await listProducts({ categoryId: category.id, limit: 1 });
-            return {
-              id: category.id,
-              name: category.name,
-              subtitle: category.description || "Shop the collection",
-              thumbnail: products[0]?.thumbnail ?? null,
-            };
+        const withCounts = await Promise.all(
+          categories.map(async (category) => {
+            const { count } = await listProducts({ categoryId: category.id, limit: 1 });
+            return { ...category, count };
           })
         );
-        setCards(withThumbnails);
+        const stocked = withCounts.filter((category) => category.count > 0).sort((a, b) => b.count - a.count);
+        const kurtaCategory = stocked.find((category) => category.name.toLowerCase().includes("kurta"));
+        const top = kurtaCategory ?? stocked[0];
+        const runnerUp = stocked.find((category) => category.id !== top?.id);
+        if (!top) {
+          setCards([]);
+          return;
+        }
+
+        const { products: topProducts } = await listProducts({ categoryId: top.id, limit: 4 });
+        setHeroImage(topProducts[3]?.thumbnail ?? topProducts[0]?.thumbnail ?? null);
+        const slots: CategoryCard[] = [
+          {
+            id: top.id,
+            name: top.name,
+            subtitle: top.description || "Shop the collection",
+            thumbnail: topProducts[0]?.thumbnail ?? null,
+          },
+        ];
+
+        if (topProducts[1]) {
+          slots.push({
+            id: top.id,
+            name: top.name,
+            subtitle: top.description || "Shop the collection",
+            thumbnail: topProducts[1].thumbnail ?? null,
+          });
+        } else if (runnerUp) {
+          const { products: runnerUpProducts } = await listProducts({ categoryId: runnerUp.id, limit: 1 });
+          slots.push({
+            id: runnerUp.id,
+            name: runnerUp.name,
+            subtitle: runnerUp.description || "Shop the collection",
+            thumbnail: runnerUpProducts[0]?.thumbnail ?? null,
+          });
+        }
+
+        setCards(slots);
       })
       .catch((error) => console.error("Failed to load hero categories", error));
   }, []);
@@ -85,12 +111,14 @@ export default function Hero() {
               className="relative w-full h-full bg-[#1c1815] overflow-hidden"
               style={{ clipPath: "url(#clip-hero-left-path)" }}
             >
-              <Image
-                src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80"
-                alt="Luxury fashion editorial"
-                fill
-                className="object-cover opacity-50 mix-blend-luminosity"
-              />
+              {heroImage && (
+                <ProductImage
+                  src={heroImage}
+                  alt="Luxury fashion editorial"
+                  fill
+                  className="object-cover object-top opacity-50 mix-blend-luminosity"
+                />
+              )}
               {/* Watermark W logo */}
               <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none">
                 <span className="text-[200px] md:text-[260px] font-bold tracking-tighter" style={{ fontFamily: "var(--font-nohemi)", WebkitTextStroke: "1.5px rgba(255, 255, 255, 0.08)", color: "transparent" }}>W</span>
@@ -98,11 +126,9 @@ export default function Hero() {
 
               {/* Top Text Content */}
               <div className="absolute top-6 left-6 md:top-8 md:left-8 max-w-[200px] md:max-w-[280px] text-white text-left z-10">
-                <p className="text-base md:text-lg font-bold tracking-wide">
-                  {productCount != null ? `${productCount}+ Products` : "New Arrivals"}
-                </p>
+                <p className="text-base md:text-lg font-bold tracking-wide">Onam Collection</p>
                 <p className="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 leading-relaxed font-light">
-                  Fashion website is an online destination dedicated to showcasing the latest trends in fashion
+                  Handcrafted kurtas for the season of celebration
                 </p>
               </div>
             </div>
