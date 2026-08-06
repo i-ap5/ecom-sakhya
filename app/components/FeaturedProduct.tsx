@@ -69,7 +69,7 @@ export default function FeaturedProduct() {
           )}
           {/* Brand Badge */}
           <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-sm rounded-xl p-4">
-            <p className="text-xs font-bold uppercase tracking-wider">SAGHYA</p>
+            <p className="text-xs font-bold uppercase tracking-[0.25em]" style={{ fontFamily: "var(--font-tenor), sans-serif" }}>LABEL WE</p>
             <p className="text-[10px] text-gray-500 uppercase tracking-wider">FROM LOCAL DESIGNERS</p>
           </div>
           {/* BEST COLLECTION circular stamp */}

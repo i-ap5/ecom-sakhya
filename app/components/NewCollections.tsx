@@ -49,7 +49,7 @@ export default function NewCollections() {
             <span className="text-[6px] font-semibold uppercase text-[#5a4a3a] leading-tight tracking-wide text-center">BEST<br />COLLECTION</span>
           </div>
           <div className="relative text-center text-white">
-            <p className="text-base font-bold uppercase tracking-widest drop-shadow">SAGHYA</p>
+            <p className="text-base font-bold uppercase tracking-[0.25em] drop-shadow" style={{ fontFamily: "var(--font-tenor), sans-serif" }}>LABEL WE</p>
             <p className="text-[10px] uppercase tracking-wider opacity-90 mt-0.5">SHOP THE FULL COLLECTION</p>
           </div>
         </Link>

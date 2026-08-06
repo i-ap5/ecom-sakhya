@@ -2,14 +2,15 @@ import { sdk } from "./client";
 import { getDefaultRegion } from "./region";
 import type { HttpTypes } from "@medusajs/types";
 
-const CART_ID_KEY = "saghya_cart_id";
+const CART_ID_KEY = "labelwe_cart_id";
+const OLD_CART_ID_KEY = "saghya_cart_id";
 
 const CART_FIELDS =
   "*items,*items.variant,*items.variant.options,*items.product,*shipping_methods,*shipping_address,*payment_collection,*payment_collection.payment_sessions,*promotions";
 
 export function getStoredCartId(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(CART_ID_KEY);
+  return localStorage.getItem(CART_ID_KEY) || localStorage.getItem(OLD_CART_ID_KEY);
 }
 
 function storeCartId(id: string) {

@@ -96,7 +96,7 @@ export default function Hero() {
           <span className="font-normal block md:inline"> Made For Her</span>
         </h1>
         <p className="text-sm text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Defining a new era of the luxury shopping experience. Saghya presents hand-curated collections
+          Defining a new era of the luxury shopping experience. Label We presents hand-curated collections
           of modern silhouettes and timeless staples, meticulously crafted for her.
         </p>
 

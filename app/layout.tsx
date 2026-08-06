@@ -1,5 +1,49 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Cormorant_Garamond, Bodoni_Moda, Cinzel, Italiana, Tenor_Sans, Syne, Playfair_Display, Montserrat, Instrument_Serif, Great_Vibes, Prata, Sacramento, Abril_Fatface, Cinzel_Decorative } from "next/font/google";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-montserrat",
+});
+
+const sacramento = Sacramento({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-sacramento",
+});
+
+const abrilFatface = Abril_Fatface({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-abril",
+});
+
+const cinzelDecorative = Cinzel_Decorative({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-cinzeldec",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument",
+});
+
+const greatVibes = Great_Vibes({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-greatvibes",
+});
+
+const prata = Prata({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-prata",
+});
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
 import { CustomerProvider } from "./context/CustomerContext";
@@ -56,8 +100,52 @@ const nohemi = localFont({
   variable: "--font-nohemi",
 });
 
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
+});
+
+const bodoni = Bodoni_Moda({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-bodoni",
+});
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-cinzel",
+});
+
+const italiana = Italiana({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-italiana",
+});
+
+const tenorSans = Tenor_Sans({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-tenor",
+});
+
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-syne",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-playfair",
+});
+
 export const metadata: Metadata = {
-  title: "Saghya – Timeless Luxury, Redefined",
+  title: "Label We – Timeless Luxury, Redefined",
   description:
     "Fashion website dedicated to showcasing the latest trends and providing inspiration for fashion-conscious individuals.",
 };
@@ -66,7 +154,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={nohemi.variable}>
+    <html
+      lang="en"
+      className={`${nohemi.variable} ${cormorant.variable} ${bodoni.variable} ${cinzel.variable} ${italiana.variable} ${tenorSans.variable} ${syne.variable} ${playfair.variable} ${montserrat.variable} ${instrumentSerif.variable} ${greatVibes.variable} ${prata.variable} ${sacramento.variable} ${abrilFatface.variable} ${cinzelDecorative.variable}`}
+    >
       <body className="min-h-full bg-white text-[#171717] antialiased">
         <CustomerProvider>
           <CartProvider>

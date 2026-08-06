@@ -58,7 +58,7 @@ function ShopPageContent() {
             {searchQuery ? `Results for "${searchQuery}"` : "Shop All"}
           </h1>
           <p className="text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
-            Explore the full Saghya collection, curated for her.
+            Explore the full Label We collection, curated for her.
           </p>
           <form onSubmit={handleSearchSubmit} className="flex justify-center gap-2 mt-6 max-w-sm mx-auto">
             <input

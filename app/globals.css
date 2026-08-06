@@ -10,6 +10,16 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-nohemi), Arial, sans-serif;
 }
 
+.font-brand {
+  font-family: var(--font-cinzel), var(--font-italiana), Georgia, serif;
+}
+.font-cinzel { font-family: var(--font-cinzel), serif; }
+.font-italiana { font-family: var(--font-italiana), serif; }
+.font-tenor { font-family: var(--font-tenor), sans-serif; }
+.font-bodoni { font-family: var(--font-bodoni), serif; }
+.font-syne { font-family: var(--font-syne), sans-serif; }
+.font-playfair { font-family: var(--font-playfair), serif; }
+
 .clip-hero-left {
   clip-path: url(#clip-hero-left-path);
 }
