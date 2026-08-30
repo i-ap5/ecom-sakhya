@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { HttpTypes } from "@medusajs/types";
 import { listCategories } from "@/lib/medusa/products";
+import { site } from "@/lib/site";
 
 export default function Footer() {
   const [categories, setCategories] = useState<HttpTypes.StoreProductCategory[]>([]);
@@ -23,29 +24,24 @@ export default function Footer() {
             className="text-xl font-bold tracking-[0.3em] uppercase"
             style={{ fontFamily: "var(--font-tenor), sans-serif" }}
           >
-            LABEL WE
+            {site.brand}
           </Link>
           <p className="text-sm text-gray-500 leading-relaxed max-w-xs mt-3">
             Timeless, hand-curated womenswear — modern silhouettes and everyday staples, made for her.
           </p>
           <div className="flex items-center gap-4 mt-5">
-            <Link href="#" aria-label="Twitter" className="text-gray-400 hover:text-black transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-            </Link>
-            <Link href="#" aria-label="Instagram" className="text-gray-400 hover:text-black transition-colors">
+            <a href={site.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-black transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                 <circle cx="12" cy="12" r="4" />
                 <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
               </svg>
-            </Link>
-            <Link href="#" aria-label="Facebook" className="text-gray-400 hover:text-black transition-colors">
+            </a>
+            <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-black transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -100,22 +96,32 @@ export default function Footer() {
           <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Company</p>
           <ul className="space-y-2.5 text-sm text-gray-600">
             <li>
-              <Link href="#" className="hover:text-black transition-colors">
-                Shipping &amp; Returns
+              <Link href="/about" className="hover:text-black transition-colors">
+                About Us
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:text-black transition-colors">
+              <Link href="/contact" className="hover:text-black transition-colors">
                 Contact Us
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:text-black transition-colors">
-                Terms of Service
+              <Link href="/shipping-policy" className="hover:text-black transition-colors">
+                Shipping &amp; Delivery
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:text-black transition-colors">
+              <Link href="/refund-policy" className="hover:text-black transition-colors">
+                Refunds &amp; Cancellations
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className="hover:text-black transition-colors">
+                Terms &amp; Conditions
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="hover:text-black transition-colors">
                 Privacy Policy
               </Link>
             </li>
@@ -124,7 +130,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-gray-100 px-6 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-        <p>© 2026 Label We. All rights reserved.</p>
+        <p>© 2026 {site.brand}. All rights reserved.</p>
         <p>
           Made by{" "}
           <a
