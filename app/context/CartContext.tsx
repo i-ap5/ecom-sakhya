@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { HttpTypes } from "@medusajs/types";
 import {
   getOrCreateCart,
+  clearStoredCartId,
   addLineItem,
   updateLineItemQuantity,
   removeLineItem,
@@ -25,6 +26,7 @@ interface CartContextType {
   currencyCode: string;
   loading: boolean;
   setCart: (cart: HttpTypes.StoreCart) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -121,6 +123,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [cart]
   );
 
+  // Called once an order is placed. Dropping the stored id alone leaves the
+  // completed cart in state — the provider sits above the route, so it never
+  // remounts on navigation and the bag keeps showing sold items until a reload.
+  const clearCart = useCallback(() => {
+    clearStoredCartId();
+    setCart(null);
+    setCartOpen(false);
+  }, []);
+
   const cartItems = cart?.items ?? [];
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart?.total ?? 0;
@@ -143,6 +154,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         currencyCode,
         loading,
         setCart,
+        clearCart,
       }}
     >
       {children}

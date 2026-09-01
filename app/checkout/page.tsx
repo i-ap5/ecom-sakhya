@@ -6,7 +6,6 @@ import type { HttpTypes } from "@medusajs/types";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useCart } from "../context/CartContext";
-import { clearStoredCartId } from "@/lib/medusa/cart";
 import { getDefaultRegion } from "@/lib/medusa/region";
 import { formatPrice } from "@/lib/medusa/products";
 import {
@@ -16,7 +15,16 @@ import {
   listPaymentProviders,
   initiatePaymentSession,
   completeCart,
+  selectPaymentProvider,
+  isRazorpayProvider,
+  getRazorpayOrderFromCollection,
 } from "@/lib/medusa/checkout";
+import {
+  openRazorpayCheckout,
+  RazorpayCheckoutCancelled,
+  RazorpayPaymentFailed,
+} from "@/lib/medusa/razorpay";
+import { site } from "@/lib/site";
 
 type Step = "address" | "shipping" | "payment";
 
@@ -28,11 +36,13 @@ const emptyAddress = {
   postal_code: "",
   province: "",
   phone: "",
+  country_code: "",
 };
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartItems, setCart, currencyCode, applyPromoCode, removePromoCode } = useCart();
+  const { cart, cartItems, setCart, clearCart, currencyCode, applyPromoCode, removePromoCode } =
+    useCart();
   const [step, setStep] = useState<Step>("address");
   const [region, setRegion] = useState<HttpTypes.StoreRegion | null>(null);
   const [email, setEmail] = useState("");
@@ -64,7 +74,16 @@ export default function CheckoutPage() {
   const [syncedCartId, setSyncedCartId] = useState<string | null>(null);
 
   useEffect(() => {
-    getDefaultRegion().then(setRegion).catch((error) => console.error(error));
+    getDefaultRegion()
+      .then((r) => {
+        setRegion(r);
+        // Default to the region's first country, but never overwrite a choice
+        // the customer (or their saved cart address) already made.
+        setAddress((prev) =>
+          prev.country_code ? prev : { ...prev, country_code: r.countries?.[0]?.iso_2 ?? "" }
+        );
+      })
+      .catch((error) => console.error(error));
   }, []);
 
   // Pre-fill the form from the cart's existing address (if any) the first time
@@ -74,15 +93,16 @@ export default function CheckoutPage() {
     setSyncedCartId(cart.id);
     if (cart.email) setEmail(cart.email);
     if (cart.shipping_address) {
-      setAddress({
-        first_name: cart.shipping_address.first_name ?? "",
-        last_name: cart.shipping_address.last_name ?? "",
-        address_1: cart.shipping_address.address_1 ?? "",
-        city: cart.shipping_address.city ?? "",
-        postal_code: cart.shipping_address.postal_code ?? "",
-        province: cart.shipping_address.province ?? "",
-        phone: cart.shipping_address.phone ?? "",
-      });
+      setAddress((prev) => ({
+        first_name: cart.shipping_address!.first_name ?? "",
+        last_name: cart.shipping_address!.last_name ?? "",
+        address_1: cart.shipping_address!.address_1 ?? "",
+        city: cart.shipping_address!.city ?? "",
+        postal_code: cart.shipping_address!.postal_code ?? "",
+        province: cart.shipping_address!.province ?? "",
+        phone: cart.shipping_address!.phone ?? "",
+        country_code: cart.shipping_address!.country_code ?? prev.country_code,
+      }));
     }
   }
 
@@ -107,11 +127,10 @@ export default function CheckoutPage() {
     setError(null);
     setPlacing(true);
     try {
-      const countryCode = region.countries?.[0]?.iso_2 ?? "in";
       const updated = await updateCartAddresses(cart.id, {
         email,
-        shipping_address: { ...address, country_code: countryCode },
-        billing_address: { ...address, country_code: countryCode },
+        shipping_address: address,
+        billing_address: address,
       });
       setCart(updated);
       const options = await listShippingOptions(cart.id);
@@ -147,20 +166,52 @@ export default function CheckoutPage() {
     setPlacing(true);
     try {
       const providers = await listPaymentProviders(region.id);
-      const provider = providers[0];
+      const provider = selectPaymentProvider(providers);
       if (!provider) throw new Error("No payment provider configured");
-      await initiatePaymentSession(cart, provider.id);
+
+      const collection = await initiatePaymentSession(cart, provider.id);
+
+      if (isRazorpayProvider(provider.id)) {
+        const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+        if (!keyId) throw new Error("Missing NEXT_PUBLIC_RAZORPAY_KEY_ID");
+
+        const { orderId, amount, currency } =
+          getRazorpayOrderFromCollection(collection);
+
+        // Blocks until the customer pays or closes the modal. We don't send the
+        // response anywhere — the backend re-checks the payment against
+        // Razorpay's API while completing the cart.
+        await openRazorpayCheckout({
+          keyId,
+          orderId,
+          amount,
+          currency,
+          name: site.brand,
+          description: `Order for ${email}`,
+          prefill: {
+            name: `${address.first_name} ${address.last_name}`.trim(),
+            email,
+            contact: address.phone,
+          },
+        });
+      }
 
       const result = await completeCart(cart.id);
       if (result.type === "order") {
-        clearStoredCartId();
+        clearCart();
         router.push(`/order/confirmed/${result.order.id}`);
       } else {
         setError(result.error?.message ?? "Something went wrong placing your order.");
       }
     } catch (err) {
-      console.error(err);
-      setError("Failed to place order. Please try again.");
+      if (err instanceof RazorpayCheckoutCancelled) {
+        setError("Payment cancelled. Your bag is saved — you can try again.");
+      } else if (err instanceof RazorpayPaymentFailed) {
+        setError(`${err.message}. No money was taken — please try again.`);
+      } else {
+        console.error(err);
+        setError("Failed to place order. Please try again.");
+      }
     } finally {
       setPlacing(false);
     }
@@ -234,6 +285,21 @@ export default function CheckoutPage() {
                 className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm"
               />
             </div>
+            <select
+              required
+              value={address.country_code}
+              onChange={(e) => setAddress({ ...address, country_code: e.target.value })}
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white"
+            >
+              <option value="" disabled>
+                Country
+              </option>
+              {(region?.countries ?? []).map((c) => (
+                <option key={c.iso_2} value={c.iso_2 ?? ""}>
+                  {c.display_name ?? c.name ?? c.iso_2}
+                </option>
+              ))}
+            </select>
             <div className="grid grid-cols-2 gap-3">
               <input
                 placeholder="State / Province"
@@ -360,14 +426,15 @@ export default function CheckoutPage() {
               </div>
             </div>
             <p className="text-xs text-gray-400">
-              Payment will be processed via the store&apos;s configured payment provider.
+              Payments are handled securely by Razorpay — card, UPI, netbanking or
+              wallet. Your card details never reach our servers.
             </p>
             <button
               onClick={handlePlaceOrder}
               disabled={placing}
               className="bg-black text-white text-sm font-semibold py-3.5 px-8 rounded-full hover:bg-gray-800 transition-colors disabled:opacity-40"
             >
-              {placing ? "Placing order…" : "Place order"}
+              {placing ? "Processing…" : "Pay and place order"}
             </button>
           </div>
         )}
