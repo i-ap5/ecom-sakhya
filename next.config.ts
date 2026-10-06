@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Vercel Image Optimization quota exhausted → serve originals directly.
+    // Set NEXT_PUBLIC_IMAGE_OPTIMIZATION=true to re-enable /_next/image.
+    unoptimized: process.env.NEXT_PUBLIC_IMAGE_OPTIMIZATION !== "true",
     remotePatterns: [
       {
         protocol: "https",

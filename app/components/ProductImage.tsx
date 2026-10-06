@@ -14,5 +14,6 @@ function isLocalUrl(src: string): boolean {
 // a local Medusa backend must skip optimization instead of going through /_next/image.
 export default function ProductImage({ alt, ...props }: ImageProps) {
   const unoptimized = typeof props.src === "string" && isLocalUrl(props.src);
-  return <Image {...props} alt={alt} unoptimized={unoptimized} />;
+  // Pass undefined (not false) so the global `images.unoptimized` config still applies.
+  return <Image {...props} alt={alt} unoptimized={unoptimized || undefined} />;
 }
