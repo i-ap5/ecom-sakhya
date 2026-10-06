@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
-import { formatPrice } from "@/lib/medusa/products";
+import { formatPrice, getVariantStock, LOW_STOCK_THRESHOLD } from "@/lib/medusa/products";
 import ProductImage from "./ProductImage";
 
 const FREE_SHIPPING_THRESHOLD = 2000;
@@ -39,6 +39,11 @@ export default function CartDrawer() {
       setPromoError("Invalid or expired code");
     }
   };
+
+  const hasStockIssue = cartItems.some((item) => {
+    const stock = getVariantStock(item.variant);
+    return stock !== null && item.quantity > stock;
+  });
 
   const subtotal = cart?.item_subtotal ?? 0;
   const qualifiesForFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
@@ -130,7 +135,11 @@ export default function CartDrawer() {
               </button>
             </div>
           ) : (
-            cartItems.map((item) => (
+            cartItems.map((item) => {
+              const stock = getVariantStock(item.variant);
+              const atMax = stock !== null && item.quantity >= stock;
+              const overStock = stock !== null && item.quantity > stock;
+              return (
               <div
                 key={item.id}
                 className="flex gap-4 pb-5 border-b border-gray-100 group animate-fade-in"
@@ -171,6 +180,13 @@ export default function CartDrawer() {
                         <span>Variant: <strong className="text-gray-700">{item.variant_title}</strong></span>
                       </div>
                     )}
+                    {overStock ? (
+                      <p className="text-[11px] text-[#b42318] mt-1">
+                        {stock === 0 ? "Sold out — please remove" : `Only ${stock} available — reduce quantity`}
+                      </p>
+                    ) : stock !== null && stock <= LOW_STOCK_THRESHOLD ? (
+                      <p className="text-[11px] text-[#b54708] mt-1">Only {stock} left</p>
+                    ) : null}
                   </div>
 
                   <div className="flex justify-between items-end">
@@ -186,7 +202,9 @@ export default function CartDrawer() {
                       <span className="w-6 text-center text-xs font-semibold text-gray-700">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-black rounded-full hover:bg-gray-50 transition-colors"
+                        disabled={atMax}
+                        title={atMax ? "No more in stock" : undefined}
+                        className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-black rounded-full hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-400"
                         aria-label="Increase quantity"
                       >
                         +
@@ -207,7 +225,8 @@ export default function CartDrawer() {
                   </div>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -270,10 +289,24 @@ export default function CartDrawer() {
               <p className="text-[11px] text-gray-400">Shipping and taxes calculated at checkout.</p>
             </div>
 
+            {hasStockIssue && (
+              <p className="text-xs text-[#b42318]">Some items are no longer available in that quantity. Update your bag to continue.</p>
+            )}
             <Link
               href="/checkout"
-              onClick={() => setCartOpen(false)}
-              className="w-full bg-black text-white text-sm font-semibold py-4 rounded-full hover:bg-gray-800 transition-all active:scale-[0.99] shadow-sm text-center tracking-wider uppercase mt-2 block"
+              aria-disabled={hasStockIssue}
+              onClick={(e) => {
+                if (hasStockIssue) {
+                  e.preventDefault();
+                  return;
+                }
+                setCartOpen(false);
+              }}
+              className={`w-full text-sm font-semibold py-4 rounded-full transition-all text-center tracking-wider uppercase mt-2 block ${
+                hasStockIssue
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-800 active:scale-[0.99] shadow-sm"
+              }`}
               style={{ fontFamily: "var(--font-nohemi)" }}
             >
               Proceed to checkout

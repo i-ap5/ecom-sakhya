@@ -1,3 +1,7 @@
+// Placeholder ratings are made up, so they stay hidden from shoppers until a
+// real reviews system exists. Flip this once reviews are real.
+export const RATINGS_ENABLED = false;
+
 // Deterministic placeholder rating derived from the product id, so the same
 // product always shows the same rating/review count until a real reviews
 // system exists.

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { HttpTypes } from "@medusajs/types";
 import ProductImage from "./ProductImage";
+import SectionHeader from "./SectionHeader";
 import { listCategories, listProducts } from "@/lib/medusa/products";
 
 interface CategoryTile {
@@ -30,40 +31,31 @@ export default function ShopByCategory() {
   if (tiles.length === 0) return null;
 
   return (
-    <section className="py-16 px-6 md:px-12 max-w-7xl mx-auto w-full">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-5xl font-semibold mb-3" style={{ fontFamily: "var(--font-nohemi)" }}>
-          Shop By Category
-        </h2>
-        <p className="text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
-          Find exactly what you&apos;re looking for, organized the way you shop.
-        </p>
-      </div>
+    <section className="px-6 md:px-16 lg:px-28 max-w-[1440px] mx-auto w-full">
+      <SectionHeader title="Shop by category" linkHref="/shop" />
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="flex gap-3 overflow-x-auto snap-x no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 md:grid md:grid-cols-4 lg:grid-cols-6 md:gap-4 md:overflow-visible">
         {tiles.map(({ category, thumbnail }) => (
           <Link
             key={category.id}
             href={`/shop?category=${category.id}`}
-            className="group flex flex-col items-center"
+            className="group snap-start shrink-0 w-[42%] sm:w-[30%] md:w-auto"
           >
-            <div
-              className="relative w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group-hover:border-gray-200 transition-colors"
-              style={{ aspectRatio: "1/1" }}
-            >
+            <div className="relative w-full aspect-[3/4] rounded-md overflow-hidden bg-[#f3f1ed]">
               {thumbnail && (
                 <ProductImage
                   src={thumbnail}
                   alt={category.name}
                   fill
-                  className="object-cover object-top group-hover:scale-[1.04] transition-transform duration-500"
+                  sizes="(min-width: 1024px) 16vw, (min-width: 768px) 25vw, 42vw"
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
                 />
               )}
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+              <p className="absolute bottom-3 left-3 right-3 text-white text-sm md:text-base font-medium capitalize truncate">
+                {category.name}
+              </p>
             </div>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[#171717] group-hover:text-gray-500 transition-colors">
-              {category.name}
-            </p>
           </Link>
         ))}
       </div>

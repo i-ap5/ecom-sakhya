@@ -15,7 +15,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-white border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-16 lg:px-28 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
         {/* Brand */}
         <div className="col-span-2 md:col-span-1">
           <Link
@@ -123,7 +123,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-gray-100 px-6 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+      <div className="border-t border-gray-100 px-6 md:px-16 lg:px-28 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-400">
         <p>© 2026 Label We. All rights reserved.</p>
         <p>
           Made by{" "}

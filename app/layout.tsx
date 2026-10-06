@@ -48,6 +48,7 @@ import "./globals.css";
 import { CartProvider } from "./context/CartContext";
 import { CustomerProvider } from "./context/CustomerContext";
 import CartDrawer from "./components/CartDrawer";
+import Toast from "./components/Toast";
 
 const nohemi = localFont({
   src: [
@@ -163,6 +164,7 @@ export default function RootLayout({
           <CartProvider>
             {children}
             <CartDrawer />
+            <Toast />
           </CartProvider>
         </CustomerProvider>
       </body>

@@ -1,15 +1,15 @@
 import Link from "next/link";
 import type { HttpTypes } from "@medusajs/types";
 import ProductImage from "./ProductImage";
-import StarRating from "./StarRating";
 import {
   formatPrice,
   getCheapestVariant,
   getDiscountPercent,
+  getLowStockCount,
   getOriginalAmount,
   isNewProduct,
+  isProductSoldOut,
 } from "@/lib/medusa/products";
-import { getProductRating } from "@/lib/rating";
 
 export default function ProductCard({
   product,
@@ -22,68 +22,60 @@ export default function ProductCard({
 }) {
   const variant = getCheapestVariant(product);
   const price = variant?.calculated_price?.calculated_amount;
-  const { rating, reviewCount } = getProductRating(product.id);
   const discountPercent = getDiscountPercent(variant);
   const isNew = isNewProduct(product);
+  const soldOut = isProductSoldOut(product);
+  const lowStock = soldOut ? undefined : getLowStockCount(product);
+  const badge = soldOut
+    ? { label: "Sold out", className: "bg-white/90 text-gray-600" }
+    : discountPercent
+      ? { label: `-${discountPercent}%`, className: "bg-[#b42318] text-white" }
+      : isNew
+        ? { label: "New", className: "bg-white text-black" }
+        : undefined;
 
   return (
     <div className="group flex flex-col">
-      <div
-        className="relative w-full rounded-3xl overflow-hidden bg-gray-50 border border-gray-100 group-hover:border-gray-200 transition-colors"
-        style={{ aspectRatio: "3/4" }}
-      >
-        <Link href={`/products/${product.handle}`}>
+      <div className="relative w-full aspect-[3/4] rounded-md overflow-hidden bg-[#f3f1ed]">
+        <Link href={`/products/${product.handle}`} aria-label={product.title}>
           {product.thumbnail && (
             <ProductImage
               src={product.thumbnail}
               alt={product.title}
               fill
-              className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
+              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+              className={`object-cover object-top transition-transform duration-700 group-hover:scale-[1.03] ${soldOut ? "opacity-60" : ""}`}
             />
           )}
         </Link>
-        {(isNew || discountPercent) && (
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-            {discountPercent ? (
-              <span className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">
-                {discountPercent}% Off
-              </span>
-            ) : (
-              <span className="bg-black text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">
-                New
-              </span>
-            )}
-          </div>
+        {badge && (
+          <span
+            className={`absolute top-3 left-3 z-10 text-[10px] font-medium uppercase tracking-wider px-2 py-1 rounded-sm ${badge.className}`}
+          >
+            {badge.label}
+          </span>
         )}
-        {variant && (
+        {variant && !soldOut && (
           <button
             onClick={() => onQuickAdd(variant.id)}
-            className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-sm text-black text-xs font-bold py-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-350 transform translate-y-2 group-hover:translate-y-0 text-center hover:bg-black hover:text-white cursor-pointer"
+            className="absolute bottom-3 left-3 right-3 bg-white text-black text-xs font-medium py-2.5 rounded-full opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:bg-black hover:text-white cursor-pointer"
           >
-            Quick Add
+            Quick add
           </button>
         )}
       </div>
-      <div className="mt-4 flex justify-between items-start gap-2">
-        <Link href={`/products/${product.handle}`} className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#171717] truncate hover:text-gray-500 transition-colors">
-            {product.title}
-          </p>
-          <div className="mt-1">
-            <StarRating rating={rating} reviewCount={reviewCount} />
-          </div>
-        </Link>
-        <div className="text-right whitespace-nowrap">
-          <p className="text-xs font-semibold text-gray-400">
-            {price != null ? formatPrice(price, currencyCode) : "—"}
-          </p>
+      <Link href={`/products/${product.handle}`} className="mt-3 flex flex-col gap-1">
+        <p className="text-sm text-[#171717] truncate">{product.title}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-sm font-medium">{price != null ? formatPrice(price, currencyCode) : "—"}</p>
           {discountPercent && (
-            <p className="text-[10px] text-gray-300 line-through">
+            <p className="text-xs text-gray-400 line-through">
               {formatPrice(getOriginalAmount(variant)!, currencyCode)}
             </p>
           )}
         </div>
-      </div>
+        {lowStock && <p className="text-xs text-[#b54708]">Only {lowStock} left</p>}
+      </Link>
     </div>
   );
 }

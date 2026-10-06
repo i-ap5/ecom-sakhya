@@ -24,26 +24,21 @@ const FEATURES = [
     title: "Quality Assured",
     description: "Curated & checked designs",
     icon: (
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
     ),
   },
 ];
 
 export default function TrustBar() {
   return (
-    <section className="border-y border-gray-100 bg-gray-50/50 py-10 px-6 md:px-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+    <section className="px-6 md:px-16 lg:px-28 max-w-[1440px] mx-auto w-full">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-4 py-6 border-b border-gray-100">
         {FEATURES.map((feature) => (
-          <div key={feature.title} className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 text-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                {feature.icon}
-              </svg>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-[#171717]">{feature.title}</p>
-              <p className="text-[11px] text-gray-400">{feature.description}</p>
-            </div>
+          <div key={feature.title} title={feature.description} className="flex items-center md:justify-center gap-2.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.3} className="shrink-0 text-gray-800">
+              {feature.icon}
+            </svg>
+            <p className="text-sm text-[#171717]">{feature.title}</p>
           </div>
         ))}
       </div>

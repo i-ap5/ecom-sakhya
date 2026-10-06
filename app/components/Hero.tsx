@@ -33,31 +33,38 @@ export default function Hero() {
           return;
         }
 
-        const { products: topProducts } = await listProducts({ categoryId: top.id, limit: 4 });
-        setHeroImage(topProducts[3]?.thumbnail ?? topProducts[0]?.thumbnail ?? null);
+        // Only products that actually have an image can fill a card.
+        const imagesFor = async (categoryId: string, limit: number) => {
+          const { products } = await listProducts({ categoryId, limit });
+          return products.map((p) => p.thumbnail).filter((t): t is string => !!t);
+        };
+
+        const topImages = await imagesFor(top.id, 8);
+        setHeroImage(topImages[3] ?? topImages[0] ?? null);
         const slots: CategoryCard[] = [
           {
             id: top.id,
             name: top.name,
             subtitle: top.description || "Shop the collection",
-            thumbnail: topProducts[0]?.thumbnail ?? null,
+            thumbnail: topImages[0] ?? null,
           },
         ];
 
-        if (topProducts[1]) {
-          slots.push({
-            id: top.id,
-            name: top.name,
-            subtitle: top.description || "Shop the collection",
-            thumbnail: topProducts[1].thumbnail ?? null,
-          });
-        } else if (runnerUp) {
-          const { products: runnerUpProducts } = await listProducts({ categoryId: runnerUp.id, limit: 1 });
+        // Prefer a second category so the two cards show different labels.
+        const runnerUpImage = runnerUp ? (await imagesFor(runnerUp.id, 4))[0] : undefined;
+        if (runnerUp && runnerUpImage) {
           slots.push({
             id: runnerUp.id,
             name: runnerUp.name,
             subtitle: runnerUp.description || "Shop the collection",
-            thumbnail: runnerUpProducts[0]?.thumbnail ?? null,
+            thumbnail: runnerUpImage,
+          });
+        } else if (topImages[1]) {
+          slots.push({
+            id: top.id,
+            name: "New In",
+            subtitle: "Shop the collection",
+            thumbnail: topImages[1],
           });
         }
 
@@ -89,23 +96,17 @@ export default function Hero() {
           </clipPath>
         </defs>
       </svg>
-      <section className="px-6 md:px-12 pt-12 pb-16 text-center max-w-7xl mx-auto w-full">
-        <h1 className="text-5xl md:text-6xl lg:text-6xl leading-tight mb-4 max-w-5xl mx-auto tracking-tight text-[#171717]" style={{ fontFamily: "var(--font-nohemi)" }}>
-          <span className="font-normal">Outfits That </span>
-          <span className="font-semibold">Bring Out Your Best,<br /></span>
-          <span className="font-normal block md:inline"> Made For Her</span>
+      <section className="px-6 md:px-16 lg:px-28 pt-10 md:pt-14 pb-4 text-center max-w-[1440px] mx-auto w-full">
+        <h1 className="text-3xl md:text-5xl font-medium leading-tight mb-8 md:mb-10 tracking-tight text-[#171717]">
+          Bring Out Your Best
         </h1>
-        <p className="text-sm text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Defining a new era of the luxury shopping experience. Label We presents hand-curated collections
-          of modern silhouettes and timeless staples, meticulously crafted for her.
-        </p>
 
         {/* Asymmetric 3-card grid */}
         <div
-          className="grid grid-cols-2 md:grid-cols-[5fr_3.5fr_2.5fr] gap-3 relative md:h-[460px]"
+          className="grid grid-cols-2 md:grid-cols-[5fr_3.5fr_2.5fr] gap-3 relative md:h-[540px]"
         >
           {/* Left card wrapper */}
-          <div className="relative w-full h-[260px] md:h-full col-span-2 md:col-span-1">
+          <div className="relative w-full h-[300px] md:h-full col-span-2 md:col-span-1">
             {/* Left dark card (tab cutout at bottom-left) */}
             <div
               className="relative w-full h-full bg-[#1c1815] overflow-hidden"
@@ -119,31 +120,20 @@ export default function Hero() {
                   className="object-cover object-top opacity-50 mix-blend-luminosity"
                 />
               )}
-              {/* Watermark W logo */}
-              <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none">
-                <span className="text-[200px] md:text-[260px] font-bold tracking-tighter" style={{ fontFamily: "var(--font-nohemi)", WebkitTextStroke: "1.5px rgba(255, 255, 255, 0.08)", color: "transparent" }}>W</span>
-              </div>
-
               {/* Top Text Content */}
-              <div className="absolute top-6 left-6 md:top-8 md:left-8 max-w-[200px] md:max-w-[280px] text-white text-left z-10">
-                <p className="text-base md:text-lg font-bold tracking-wide">Onam Collection</p>
-                <p className="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 leading-relaxed font-light">
-                  Handcrafted kurtas for the season of celebration
-                </p>
+              <div className="absolute top-5 left-5 md:top-8 md:left-8 text-white text-left z-10">
+                <p className="text-lg md:text-2xl font-medium">Onam Collection</p>
               </div>
             </div>
 
             {/* Shop now positioned at the bottom-left gap area (outside clipped card) */}
-            <div className="absolute bottom-3 left-4 md:bottom-6 md:left-8 z-20">
+            <div className="absolute bottom-[10px] left-3 md:bottom-6 md:left-8 z-20">
               <Link
                 href="/shop"
-                className="group flex items-center gap-1.5 md:gap-3 text-black hover:text-gray-700 transition-colors text-sm md:text-lg tracking-wide"
+                className="group flex items-center gap-1.5 md:gap-3 text-black hover:text-gray-700 transition-colors text-xs md:text-base font-medium"
               >
-                <span>
-                  <span className="font-extrabold">shop </span>
-                  <span className="font-light">now</span>
-                </span>
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[#1c1815] text-white flex items-center justify-center shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-black flex-shrink-0">
+                <span>Shop now</span>
+                <div className="w-6 h-6 md:w-9 md:h-9 rounded-full bg-[#1c1815] text-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105 flex-shrink-0">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="10"
@@ -164,7 +154,7 @@ export default function Hero() {
           {/* Middle card (step down top-right) */}
           <Link
             href={middleCard ? `/shop?category=${middleCard.id}` : "/shop"}
-            className="relative bg-[#eae6df] overflow-hidden h-[210px] md:h-full col-span-1 block"
+            className="relative bg-[#eae6df] overflow-hidden h-[250px] md:h-full col-span-1 block"
             style={{ clipPath: "url(#clip-hero-middle-path)" }}
           >
             {middleCard?.thumbnail && (
@@ -179,17 +169,16 @@ export default function Hero() {
 
             {/* Bottom-left White text overlay */}
             <div className="absolute bottom-5 left-5 md:bottom-8 md:left-8 text-left text-white z-10">
-              <p className="text-lg md:text-2xl font-bold tracking-wide capitalize" style={{ fontFamily: "var(--font-nohemi)" }}>
+              <p className="text-lg md:text-2xl font-medium capitalize">
                 {middleCard?.name ?? "Shop"}
               </p>
-              <p className="text-[10px] md:text-xs text-gray-300 mt-1 font-light">{middleCard?.subtitle}</p>
             </div>
           </Link>
 
           {/* Right card (step down top-left) */}
           <Link
             href={rightCard ? `/shop?category=${rightCard.id}` : "/shop"}
-            className="relative bg-[#eae6df] overflow-hidden h-[210px] md:h-full col-span-1 block"
+            className="relative bg-[#eae6df] overflow-hidden h-[250px] md:h-full col-span-1 block"
             style={{ clipPath: "url(#clip-hero-right-path)" }}
           >
             {rightCard?.thumbnail && (
@@ -200,24 +189,22 @@ export default function Hero() {
                 className="object-cover object-top"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
             {/* Bottom-left White text overlay */}
             <div className="absolute bottom-5 left-5 md:bottom-8 md:left-8 text-left text-white z-10">
-              <p className="text-lg md:text-2xl font-bold tracking-wide capitalize" style={{ fontFamily: "var(--font-nohemi)" }}>
+              <p className="text-lg md:text-2xl font-medium capitalize">
                 {rightCard?.name ?? "Shop"}
               </p>
-              <p className="text-[10px] md:text-xs text-gray-300 mt-1 font-light">{rightCard?.subtitle}</p>
             </div>
           </Link>
 
           {/* Text inside the top dip between Card 2 and Card 3 */}
           <div
-            className="absolute top-[280px] md:top-4 z-20 flex items-center justify-center select-none pointer-events-none text-black text-sm md:text-xl left-[calc(50%-90px)] md:left-[calc(8.5/11*(100%-24px)+18px-90px)]"
-            style={{ width: "180px", fontFamily: "var(--font-nohemi)" }}
+            className="absolute top-[312px] h-[37px] md:top-4 md:h-auto z-20 flex items-center justify-center select-none pointer-events-none text-black text-xs md:text-base font-medium left-[calc(50%-90px)] md:left-[calc(8.5/11*(100%-24px)+18px-90px)]"
+            style={{ width: "180px" }}
           >
-            <span className="font-bold">collection </span>
-            <span className="font-light">&nbsp;&apos;26</span>
+            Collection &apos;26
           </div>
         </div>
       </section>

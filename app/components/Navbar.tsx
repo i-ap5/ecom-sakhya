@@ -5,30 +5,47 @@ import type { HttpTypes } from "@medusajs/types";
 import { useCart } from "../context/CartContext";
 import AnnouncementBar from "./AnnouncementBar";
 import SearchModal from "./SearchModal";
-import { listCategories } from "@/lib/medusa/products";
+import { listCategories, listCollections } from "@/lib/medusa/products";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<"categories" | "collections" | null>(null);
   const [categories, setCategories] = useState<HttpTypes.StoreProductCategory[]>([]);
+  const [collections, setCollections] = useState<HttpTypes.StoreCollection[]>([]);
   const { cartCount, setCartOpen } = useCart();
 
   useEffect(() => {
     listCategories()
       .then(setCategories)
       .catch((error) => console.error("Failed to load nav categories", error));
+    listCollections()
+      .then(setCollections)
+      .catch((error) => console.error("Failed to load nav collections", error));
   }, []);
 
+  const menus = [
+    {
+      key: "categories" as const,
+      label: "Categories",
+      items: categories.map((cat) => ({ id: cat.id, label: cat.name, href: `/shop?category=${cat.id}` })),
+    },
+    {
+      key: "collections" as const,
+      label: "Collections",
+      items: collections.map((c) => ({ id: c.id, label: c.title.trim(), href: `/shop?collection=${c.id}` })),
+    },
+  ].filter((menu) => menu.items.length > 0);
+
   const navLinks = [
-    { label: "New Arrivals", href: "/shop" },
-    { label: "All Product", href: "/shop" },
+    { label: "New Arrivals", href: "/shop?sort=newest" },
+    { label: "Shop all", href: "/shop" },
   ];
 
   return (
     <>
       <AnnouncementBar />
-      <nav className="w-full px-6 md:px-12 py-4 flex items-center justify-between bg-white border-b border-gray-100 sticky top-0 z-50">
+      <nav className="w-full px-6 md:px-16 lg:px-28 py-4 flex items-center justify-between bg-white border-b border-gray-100 sticky top-0 z-50">
         {/* Logo */}
         <Link
           href="/"
@@ -40,35 +57,41 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <ul className="hidden md:flex items-center gap-8 text-sm text-gray-700 font-medium">
-          {categories.length > 0 && (
+          {menus.map((menu) => (
             <li
+              key={menu.key}
               className="relative"
-              onMouseEnter={() => setCategoriesOpen(true)}
-              onMouseLeave={() => setCategoriesOpen(false)}
+              onMouseEnter={() => setOpenMenu(menu.key)}
+              onMouseLeave={() => setOpenMenu(null)}
             >
-              <button className="flex items-center gap-1 hover:text-black transition-colors cursor-pointer">
-                Categories
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <button
+                onClick={() => setOpenMenu(openMenu === menu.key ? null : menu.key)}
+                aria-expanded={openMenu === menu.key}
+                className="flex items-center gap-1 hover:text-black transition-colors cursor-pointer"
+              >
+                {menu.label}
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className={`transition-transform ${openMenu === menu.key ? "rotate-180" : ""}`}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </button>
-              {categoriesOpen && (
-                <div className="absolute top-full left-0 pt-3 w-48">
-                  <div className="bg-white border border-gray-100 rounded-xl shadow-lg py-2">
-                    {categories.map((cat) => (
+              {openMenu === menu.key && (
+                <div className="absolute top-full left-0 pt-3 w-52">
+                  <div className="bg-white border border-gray-100 rounded-md shadow-lg py-2">
+                    {menu.items.map((item) => (
                       <Link
-                        key={cat.id}
-                        href={`/shop?category=${cat.id}`}
-                        className="block px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-50 transition-colors"
+                        key={item.id}
+                        href={item.href}
+                        onClick={() => setOpenMenu(null)}
+                        className="block px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-50 transition-colors capitalize"
                       >
-                        {cat.name}
+                        {item.label}
                       </Link>
                     ))}
                   </div>
                 </div>
               )}
             </li>
-          )}
+          ))}
           {navLinks.map((item) => (
             <li key={item.label}>
               <Link href={item.href} className="hover:text-black transition-colors">
@@ -154,23 +177,23 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {menuOpen && (
           <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 py-4 px-6 flex flex-col gap-4 md:hidden shadow-lg z-50">
-            {categories.length > 0 && (
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Categories</p>
+            {menus.map((menu) => (
+              <div key={menu.key}>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400 mb-2">{menu.label}</p>
                 <div className="flex flex-col gap-3">
-                  {categories.map((cat) => (
+                  {menu.items.map((item) => (
                     <Link
-                      key={cat.id}
-                      href={`/shop?category=${cat.id}`}
+                      key={item.id}
+                      href={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className="text-sm text-gray-700 hover:text-black transition-colors"
+                      className="text-sm text-gray-700 hover:text-black transition-colors capitalize"
                     >
-                      {cat.name}
+                      {item.label}
                     </Link>
                   ))}
                 </div>
               </div>
-            )}
+            ))}
             {navLinks.map((item) => (
               <Link
                 key={item.label}

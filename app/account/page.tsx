@@ -6,6 +6,7 @@ import type { HttpTypes } from "@medusajs/types";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useCustomer } from "../context/CustomerContext";
+import NewsletterToggle from "../components/NewsletterToggle";
 import { createCustomerAddress, deleteCustomerAddress, listCustomerOrders } from "@/lib/medusa/customer";
 import { formatPrice } from "@/lib/medusa/products";
 import { getDefaultRegion } from "@/lib/medusa/region";
@@ -94,6 +95,8 @@ export default function AccountPage() {
             Sign out
           </button>
         </div>
+
+        <NewsletterToggle customer={customer} onChange={refresh} />
 
         <div className="flex gap-6 border-b border-gray-200 mb-6 text-sm font-semibold uppercase tracking-wider">
           <button

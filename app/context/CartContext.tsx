@@ -15,7 +15,7 @@ interface CartContextType {
   cartItems: HttpTypes.StoreCartLineItem[];
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
-  addToCart: (variantId: string, quantity?: number) => Promise<void>;
+  addToCart: (variantId: string, quantity?: number) => Promise<boolean>;
   updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   removeFromCart: (lineItemId: string) => Promise<void>;
   applyPromoCode: (code: string) => Promise<boolean>;
@@ -25,6 +25,18 @@ interface CartContextType {
   currencyCode: string;
   loading: boolean;
   setCart: (cart: HttpTypes.StoreCart) => void;
+  notice: string | null;
+  dismissNotice: () => void;
+}
+
+// Medusa rejects stock-limited variants with an inventory error; show shoppers
+// something they can act on instead of the raw API message.
+function friendlyCartError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+  if (/inventory|stock|quantity/i.test(message)) {
+    return "Sorry, there isn't enough stock for that. Try another size or a smaller quantity.";
+  }
+  return "Something went wrong updating your bag. Please try again.";
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -33,6 +45,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null);
   const [isCartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const dismissNotice = useCallback(() => setNotice(null), []);
 
   useEffect(() => {
     getOrCreateCart()
@@ -48,6 +62,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const updated = await addLineItem(activeCart.id, variantId, quantity);
         setCart(updated);
         setCartOpen(true);
+        return true;
+      } catch (error) {
+        setNotice(friendlyCartError(error));
+        return false;
       } finally {
         setLoading(false);
       }
@@ -67,6 +85,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
         const updated = await updateLineItemQuantity(cart.id, lineItemId, quantity);
         setCart(updated);
+      } catch (error) {
+        setNotice(friendlyCartError(error));
       } finally {
         setLoading(false);
       }
@@ -81,6 +101,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         await removeLineItem(cart.id, lineItemId);
         setCart({ ...cart, items: cart.items?.filter((i) => i.id !== lineItemId) });
+      } catch (error) {
+        setNotice(friendlyCartError(error));
       } finally {
         setLoading(false);
       }
@@ -143,6 +165,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         currencyCode,
         loading,
         setCart,
+        notice,
+        dismissNotice,
       }}
     >
       {children}

@@ -29,36 +29,33 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="bg-[#1a1a1a] py-20 px-6 md:px-12 text-white text-center">
-      <h2
-        className="text-2xl md:text-4xl font-semibold max-w-lg mx-auto mb-8 leading-snug"
-        style={{ fontFamily: "var(--font-nohemi)" }}
-      >
-        Sign up to get brief updates – new colors, sizes, and styles straight to your inbox.
-      </h2>
+    <section className="px-6 md:px-16 lg:px-28 max-w-[1440px] mx-auto w-full">
+      <div className="rounded-md bg-[#f3f1ed] px-6 py-14 md:py-20 text-center">
+        <h2 className="text-2xl md:text-3xl font-medium tracking-tight">Get first look at new drops</h2>
 
-      {status === "success" ? (
-        <p className="text-sm text-emerald-400 font-medium">You&apos;re subscribed! Watch your inbox.</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="flex items-center gap-3 max-w-sm mx-auto">
-          <input
-            type="email"
-            required
-            placeholder="Your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 bg-white/10 border border-white/20 text-white placeholder-white/50 text-sm px-5 py-3 rounded-full outline-none focus:border-white/60 transition-colors"
-          />
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="bg-white text-black text-sm px-6 py-3 rounded-full hover:bg-gray-100 transition-colors shrink-0 disabled:opacity-50"
-          >
-            {status === "loading" ? "Sending…" : "Send"}
-          </button>
-        </form>
-      )}
-      {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
+        {status === "success" ? (
+          <p className="text-sm text-emerald-700 font-medium mt-8">You&apos;re subscribed! Watch your inbox.</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-md mx-auto mt-8">
+            <input
+              type="email"
+              required
+              placeholder="Your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 min-w-0 bg-white border border-gray-200 text-sm px-5 py-3 rounded-full outline-none focus:border-black transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="bg-black text-white text-sm font-medium px-6 py-3 rounded-full hover:bg-black/85 transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+            >
+              {status === "loading" ? "Sending…" : "Subscribe"}
+            </button>
+          </form>
+        )}
+        {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+      </div>
     </section>
   );
 }

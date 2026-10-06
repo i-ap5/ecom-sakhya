@@ -1,75 +1,65 @@
 "use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import type { HttpTypes } from "@medusajs/types";
-import ProductImage from "./ProductImage";
-import { listProducts } from "@/lib/medusa/products";
+import { useCart } from "../context/CartContext";
+import ProductCard from "./ProductCard";
+import SectionHeader from "./SectionHeader";
+import { findCollection, listProducts } from "@/lib/medusa/products";
 
 export default function TrendingNow() {
+  const { addToCart, currencyCode } = useCart();
   const [products, setProducts] = useState<HttpTypes.StoreProduct[]>([]);
+  const [viewAllHref, setViewAllHref] = useState("/shop");
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    listProducts({ limit: 5, offset: 2 })
+    // Curated from a Medusa collection named "Trending"; until one exists, fall back to
+    // products beyond the New Arrivals row.
+    findCollection("trending")
+      .then((collection) => {
+        if (collection) setViewAllHref(`/shop?collection=${collection.id}`);
+        return listProducts(collection ? { collectionId: collection.id, limit: 12 } : { limit: 8, offset: 4 });
+      })
       .then(({ products }) => setProducts(products))
       .catch((error) => console.error("Failed to load trending products", error));
   }, []);
 
   if (products.length === 0) return null;
 
+  const scroll = (direction: 1 | -1) => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: "smooth" });
+  };
+
   return (
-    <section className="py-20 px-6 md:px-12 max-w-7xl mx-auto w-full overflow-hidden">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-bold mb-3" style={{ fontFamily: "var(--font-nohemi)" }}>
-          Trending Now
-        </h2>
-        <p className="text-sm text-gray-500 max-w-xl mx-auto leading-relaxed">
-          The pieces our customers can&apos;t stop reaching for this season.
-        </p>
-      </div>
-
-      {/* Horizontal portrait photo strip with slanted, staggered, overlapping layout */}
-      <div className="relative flex justify-center items-center px-4 py-8 mt-4 select-none">
-        {products.map((product, i) => {
-          const isOdd = i % 2 === 0;
-          const clipPathStyle = isOdd
-            ? "polygon(0 0, 100% 8%, 100% 100%, 0 92%)"
-            : "polygon(0 8%, 100% 0, 100% 92%, 0 100%)";
-          const staggerClass = isOdd
-            ? "translate-y-4 md:translate-y-6"
-            : "-translate-y-4 md:-translate-y-6";
-
-          return (
-            <Link
-              key={product.id}
-              href={`/products/${product.handle}`}
-              className={`relative flex-1 mx-[-8px] md:mx-[-14px] overflow-hidden group transition-all duration-300 hover:z-20 hover:scale-[1.03] ${staggerClass}`}
-              style={{
-                aspectRatio: "2/3",
-                clipPath: clipPathStyle,
-              }}
+    <section className="px-6 md:px-16 lg:px-28 max-w-[1440px] mx-auto w-full">
+      <SectionHeader title="Trending now" linkHref={viewAllHref}>
+        <div className="hidden md:flex gap-2">
+          {([-1, 1] as const).map((dir) => (
+            <button
+              key={dir}
+              onClick={() => scroll(dir)}
+              aria-label={dir === -1 ? "Scroll left" : "Scroll right"}
+              className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:border-black hover:text-black transition-colors cursor-pointer"
             >
-              {product.thumbnail && (
-                <ProductImage
-                  src={product.thumbnail}
-                  alt={product.title}
-                  fill
-                  className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-              <p className="absolute bottom-4 left-0 right-0 text-center text-white text-[10px] font-semibold uppercase tracking-wide px-2 truncate">
-                {product.title}
-              </p>
-            </Link>
-          );
-        })}
-
-        {/* TRENDING floating badge */}
-        <div className="absolute bottom-4 right-[15%] md:right-[20%] z-30 w-[60px] h-[60px] rounded-full border border-dashed border-[#9a8a7a]/60 bg-[#f5f0e8] flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-[6.5px] font-bold uppercase text-[#5a4a3a] leading-tight tracking-[0.15em] text-center">
-            TRENDING<br />NOW
-          </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={dir === -1 ? "M15.75 19.5L8.25 12l7.5-7.5" : "M8.25 4.5l7.5 7.5-7.5 7.5"} />
+              </svg>
+            </button>
+          ))}
         </div>
+      </SectionHeader>
+
+      <div
+        ref={trackRef}
+        className="flex gap-3 md:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-6 px-6 md:mx-0 md:px-0"
+      >
+        {products.map((p) => (
+          <div key={p.id} className="snap-start shrink-0 w-[62%] sm:w-[40%] md:w-[calc((100%-3*1.25rem)/4)]">
+            <ProductCard product={p} currencyCode={currencyCode} onQuickAdd={addToCart} />
+          </div>
+        ))}
       </div>
     </section>
   );
