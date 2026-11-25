@@ -33,38 +33,37 @@ export default function Hero() {
           return;
         }
 
-        const { products: topProducts } = await listProducts({ categoryId: top.id, limit: 4 });
-        // Photos for the banner come from other products so the festive
-        // "Hand-Block Print" kurti image is no longer featured.
+        // Right card: a different category (e.g. Western Wear) with its own photo.
+        const runnerUpPhoto = runnerUp
+          ? (await listProducts({ categoryId: runnerUp.id, limit: 10 })).products.find((product) => product.thumbnail)
+              ?.thumbnail ?? null
+          : null;
+
+        // Banner photos come from products other than the festive "Hand-Block Print" kurti.
         const { products: allProducts } = await listProducts({ limit: 30 });
         const bannerPhotos = allProducts
-          .filter((product) => product.thumbnail && !/hand-block/i.test(product.title))
+          .filter(
+            (product) =>
+              product.thumbnail && product.thumbnail !== runnerUpPhoto && !/hand-block/i.test(product.title)
+          )
           .sort((a, b) => Number(/piece/i.test(b.title)) - Number(/piece/i.test(a.title)))
           .map((product) => product.thumbnail as string);
         setHeroImage(bannerPhotos[0] ?? null);
+
         const slots: CategoryCard[] = [
           {
             id: top.id,
             name: top.name,
             subtitle: top.description || "Shop the collection",
-            thumbnail: bannerPhotos[1] ?? topProducts[0]?.thumbnail ?? null,
+            thumbnail: bannerPhotos[1] ?? null,
           },
         ];
-
-        if (topProducts[1]) {
-          slots.push({
-            id: top.id,
-            name: top.name,
-            subtitle: top.description || "Shop the collection",
-            thumbnail: topProducts[1].thumbnail ?? null,
-          });
-        } else if (runnerUp) {
-          const { products: runnerUpProducts } = await listProducts({ categoryId: runnerUp.id, limit: 1 });
+        if (runnerUp) {
           slots.push({
             id: runnerUp.id,
             name: runnerUp.name,
             subtitle: runnerUp.description || "Shop the collection",
-            thumbnail: runnerUpProducts[0]?.thumbnail ?? null,
+            thumbnail: runnerUpPhoto,
           });
         }
 
