@@ -34,13 +34,20 @@ export default function Hero() {
         }
 
         const { products: topProducts } = await listProducts({ categoryId: top.id, limit: 4 });
-        setHeroImage(topProducts[3]?.thumbnail ?? topProducts[0]?.thumbnail ?? null);
+        // Photos for the banner come from other products so the festive
+        // "Hand-Block Print" kurti image is no longer featured.
+        const { products: allProducts } = await listProducts({ limit: 30 });
+        const bannerPhotos = allProducts
+          .filter((product) => product.thumbnail && !/hand-block/i.test(product.title))
+          .sort((a, b) => Number(/piece/i.test(b.title)) - Number(/piece/i.test(a.title)))
+          .map((product) => product.thumbnail as string);
+        setHeroImage(bannerPhotos[0] ?? null);
         const slots: CategoryCard[] = [
           {
             id: top.id,
             name: top.name,
             subtitle: top.description || "Shop the collection",
-            thumbnail: topProducts[0]?.thumbnail ?? null,
+            thumbnail: bannerPhotos[1] ?? topProducts[0]?.thumbnail ?? null,
           },
         ];
 
@@ -126,9 +133,9 @@ export default function Hero() {
 
               {/* Top Text Content */}
               <div className="absolute top-6 left-6 md:top-8 md:left-8 max-w-[200px] md:max-w-[280px] text-white text-left z-10">
-                <p className="text-base md:text-lg font-bold tracking-wide">Onam Collection</p>
+                <p className="text-base md:text-lg font-bold tracking-wide">New Arrivals</p>
                 <p className="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 leading-relaxed font-light">
-                  Handcrafted kurtas for the season of celebration
+                  Handcrafted styles, fresh off the loom
                 </p>
               </div>
             </div>
