@@ -9,8 +9,9 @@ export default function TrendingNow() {
   const [products, setProducts] = useState<HttpTypes.StoreProduct[]>([]);
 
   useEffect(() => {
-    listProducts({ limit: 5, offset: 2 })
-      .then(({ products }) => setProducts(products))
+    // Only show products that have a photo, so no blank cards appear.
+    listProducts({ limit: 30 })
+      .then(({ products }) => setProducts(products.filter((product) => product.thumbnail).slice(2, 7)))
       .catch((error) => console.error("Failed to load trending products", error));
   }, []);
 

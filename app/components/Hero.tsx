@@ -11,6 +11,9 @@ interface CategoryCard {
   thumbnail: string | null;
 }
 
+// Product whose photo is featured on the "Kurtis" banner card (white kurta with pink dupatta).
+const KURTIS_BANNER_PRODUCT_ID = "prod_01M7ES15THJZKXVMGRGA1A2FP6";
+
 export default function Hero() {
   const [cards, setCards] = useState<CategoryCard[]>([]);
   const [heroImage, setHeroImage] = useState<string | null>(null);
@@ -41,10 +44,14 @@ export default function Hero() {
 
         // Banner photos come from products other than the festive "Hand-Block Print" kurti.
         const { products: allProducts } = await listProducts({ limit: 30 });
+        const kurtisPhoto = allProducts.find((product) => product.id === KURTIS_BANNER_PRODUCT_ID)?.thumbnail ?? null;
         const bannerPhotos = allProducts
           .filter(
             (product) =>
-              product.thumbnail && product.thumbnail !== runnerUpPhoto && !/hand-block/i.test(product.title)
+              product.thumbnail &&
+              product.thumbnail !== runnerUpPhoto &&
+              product.thumbnail !== kurtisPhoto &&
+              !/hand-block/i.test(product.title)
           )
           .sort((a, b) => Number(/piece/i.test(b.title)) - Number(/piece/i.test(a.title)))
           .map((product) => product.thumbnail as string);
@@ -55,7 +62,7 @@ export default function Hero() {
             id: top.id,
             name: top.name,
             subtitle: top.description || "Shop the collection",
-            thumbnail: bannerPhotos[1] ?? null,
+            thumbnail: kurtisPhoto ?? bannerPhotos[1] ?? null,
           },
         ];
         if (runnerUp) {
